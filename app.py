@@ -272,7 +272,10 @@ Create a focused coaching plan targeting the learner's biggest weakness. Return 
             max_tokens=700,
             messages=[{"role": "user", "content": prompt}],
         )
-        text = response.content[0].text.strip()
+        text_block = next((b for b in response.content if hasattr(b, "text")), None)
+        if not text_block:
+            return
+        text = text_block.text.strip()
         if "```" in text:
             text = text.split("```")[1].lstrip("json").strip()
         plan_data = json.loads(text)
@@ -481,7 +484,10 @@ Only include errors actually observed in the conversation. Be specific."""
         max_tokens=900,
         messages=[{"role": "user", "content": prompt}],
     )
-    text = response.content[0].text.strip()
+    text_block = next((b for b in response.content if hasattr(b, "text")), None)
+    if not text_block:
+        raise ValueError("No text block in response")
+    text = text_block.text.strip()
     if "```" in text:
         text = text.split("```")[1].lstrip("json").strip()
     data = json.loads(text)
